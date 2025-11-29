@@ -20,8 +20,8 @@ This project implements a complete experimental workflow to:
 Statistical ML Diabetes Evaluation/
 ├── Datasets/
 │   ├── CTGAN/
-│   │   ├── synthetic_1.csv              # Scaled GAN synthetic data
-│   │   └── synthetic_1_unscaled.csv     # Unscaled GAN synthetic data
+│   │   ├── synthetic_1.csv              # Scaled CTGAN synthetic data
+│   │   └── synthetic_1_unscaled.csv     # Unscaled CTGAN synthetic data
 │   ├── VAE/
 │   │   ├── synthetic_2.csv              # Scaled VAE synthetic data
 │   │   └── synthetic_2_unscaled.csv     # Unscaled VAE synthetic data

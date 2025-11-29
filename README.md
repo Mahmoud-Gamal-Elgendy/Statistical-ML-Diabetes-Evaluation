@@ -40,7 +40,7 @@ Statistical ML Diabetes Evaluation/
 │   ├── statistical_analysis.py          # Friedman & post-hoc tests
 │   ├── visualization.py                 # Plotting and visualization
 │   ├── unscale_synthetic_data.py        # Data preprocessing utilities
-│   └── test_statistical_analysis.py     # Unit tests
+│   └── test_statistical_analysis.py     # test
 ├── Reports/                             # Generated reports and results
 ├── visualizations/                      # Generated plots and charts
 ├── Project workflow/                    # Documentation and workflows

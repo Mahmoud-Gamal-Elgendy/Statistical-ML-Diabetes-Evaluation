@@ -113,9 +113,6 @@ pip install sdv torch joblib
 # Clone the repository
 git clone https://github.com/Mahmoud-Gamal-Elgendy/Statistical-ML-Diabetes-Evaluation.git
 cd Statistical-ML-Diabetes-Evaluation
-
-# Install dependencies
-pip install -r requirements.txt
 ```
 
 ## 💻 Usage
@@ -130,12 +127,11 @@ python main.py
 ```
 
 This will:
-1. Load all three datasets (Real, GAN, VAE)
-2. Train 36 model configurations
-3. Save trained models to `models/` directory
-4. Perform statistical analysis
-5. Generate visualizations
-6. Export results to `experiment_results_complete.csv`
+1. Train 36 model configurations
+2. Save trained models to `models/` directory
+3. Perform statistical analysis
+4. Generate visualizations
+5. Export results to `experiment_results_complete.csv`
 
 ### Individual Components
 
@@ -171,24 +167,6 @@ results_df = pd.read_csv('experiment_results_complete.csv')
 save_visualizations(results_df, output_dir='visualizations')
 ```
 
-## 📊 Output Files
-
-### Generated Results
-
-| File/Directory | Description |
-|---------------|-------------|
-| `experiment_results_complete.csv` | Complete results for all 36 experiments |
-| `models/` | 36 trained model pickle files |
-| `visualizations/` | Comparison plots and performance charts |
-| `Datasets/CTGAN/` | GAN-generated synthetic datasets |
-| `Datasets/VAE/` | VAE-generated synthetic datasets |
-
-### Results CSV Schema
-
-```
-Experiment_ID, Dataset, Dataset_Name, Model_Group, Model_Name, Parameter_Set,
-Accuracy, Precision, Recall, F1_Score, Training_Time, Model_Path
-```
 
 ## 🔬 Key Features
 
@@ -216,27 +194,10 @@ Accuracy, Precision, Recall, F1_Score, Training_Time, Model_Path
 - Dataset performance analysis
 - Parameter sensitivity plots
 
-## 📈 Example Results
-
-```
-Top 5 Performing Configurations:
-Experiment_ID  Dataset_Name  Model_Name      Accuracy  F1_Score
-D1_G3_P4       Real          XGBoost         0.8532    0.8421
-D1_G1_P4       Real          RandomForest    0.8498    0.8387
-D2_G3_P3       GAN           XGBoost         0.8376    0.8265
-D1_G3_P3       Real          XGBoost         0.8359    0.8248
-D3_G1_P4       VAE           RandomForest    0.8287    0.8176
-
-Overall Statistics:
-  Mean Accuracy: 0.8145
-  Std Accuracy:  0.0234
-  Max Accuracy:  0.8532
-  Min Accuracy:  0.7654
-```
 
 ## 🧪 Testing
 
-Run unit tests:
+Run tests:
 
 ```bash
 python test_statistical_analysis.py
@@ -255,15 +216,11 @@ This framework is suitable for:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
-
-This project is part of academic research at the Faculty of Information and Communication Technology, WUST (M.Sc).
-
 ## 👥 Author
 
-**Mahmoud Gamal Elgendy**
+**Mahmoud Youssef**
 - GitHub: [@Mahmoud-Gamal-Elgendy](https://github.com/Mahmoud-Gamal-Elgendy)
-- Project: M.Sc AI Research - Statistical ML Diabetes Evaluation
+- Project: Statistical ML Diabetes Evaluation
 
 ## 🙏 Acknowledgments
 

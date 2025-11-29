@@ -261,9 +261,9 @@ This project is part of academic research at the Faculty of Information and Comm
 
 ## 👥 Author
 
-**Mahmoud Gamal Elgendy**
+**Mahmoud Youssef**
 - GitHub: [@Mahmoud-Gamal-Elgendy](https://github.com/Mahmoud-Gamal-Elgendy)
-- Project: M.Sc AI Research - Statistical ML Diabetes Evaluation
+- Project: Statistical ML Diabetes Evaluation
 
 ## 🙏 Acknowledgments
 

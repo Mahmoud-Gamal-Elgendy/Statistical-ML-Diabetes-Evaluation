@@ -226,7 +226,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - **Dataset**: BRFSS 2015 Diabetes Health Indicators
 - **Libraries**: scikit-learn, XGBoost, SDV, PyTorch
-- **Institution**: Faculty of Information and Communication Technology, WUST
 
 ## 📚 References
 

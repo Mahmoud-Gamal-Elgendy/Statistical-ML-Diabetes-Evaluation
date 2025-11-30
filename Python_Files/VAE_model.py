@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 print("Starting data preprocessing...")
 
 # Load the dataset
-dataset_path = r"e:\Study (B.Sc & M.Sc )\Faculty Of Information and Communication Technology, WUST (M.Sc)\S 2\AI\Project\Project Implementaion v2\Datasets\Real\diabetes_012_health_indicators_BRFSS2015.csv"
+dataset_path = r"Datasets\Real\diabetes_012_health_indicators_BRFSS2015.csv"
 dataset = pd.read_csv(dataset_path)
 print(f"Loaded dataset with shape: {dataset.shape}")
 
@@ -121,9 +121,9 @@ def vae_loss(x_recon, x, mu, logvar):
 print("\nTraining VAE model with checkpoint continuation...")
 
 # Setup paths
-checkpoint_dir = r"e:\Study (B.Sc & M.Sc )\Faculty Of Information and Communication Technology, WUST (M.Sc)\S 2\AI\Project\Project Implementaion v2\models\VAE\checkpoints"
-models_dir = r"e:\Study (B.Sc & M.Sc )\Faculty Of Information and Communication Technology, WUST (M.Sc)\S 2\AI\Project\Project Implementaion v2\models\VAE"
-output_dir = r"e:\Study (B.Sc & M.Sc )\Faculty Of Information and Communication Technology, WUST (M.Sc)\S 2\AI\Project\Project Implementaion v2\Datasets\VAE"
+checkpoint_dir = r"models\VAE\checkpoints"
+models_dir = r"models\VAE"
+output_dir = r"Datasets\VAE"
 
 # Create directories if they don't exist
 os.makedirs(checkpoint_dir, exist_ok=True)

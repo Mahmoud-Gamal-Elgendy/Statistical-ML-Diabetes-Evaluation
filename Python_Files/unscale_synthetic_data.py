@@ -5,10 +5,10 @@ from sklearn.preprocessing import StandardScaler
 import warnings
 warnings.filterwarnings("ignore")
 
-synthetic_data_path = r"E:\Study (B.Sc & M.Sc )\Faculty Of Information and Communication Technology, WUST (M.Sc)\S 2\AI\Project\Project Implementaion v2\Datasets\CTGAN\synthetic_1.csv"
+synthetic_data_path = r"Datasets\CTGAN\synthetic_1.csv"
 
 # Load real dataset to fit scalers
-real_dataset_path = r"e:\Study (B.Sc & M.Sc )\Faculty Of Information and Communication Technology, WUST (M.Sc)\S 2\AI\Project\Project Implementaion v2\Datasets\Real\diabetes_012_health_indicators_BRFSS2015.csv"
+real_dataset_path = r"Datasets\Real\diabetes_012_health_indicators_BRFSS2015.csv"
 real_dataset = pd.read_csv(real_dataset_path)
 real_dataset = real_dataset.drop_duplicates()
 

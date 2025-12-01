@@ -1,0 +1,5 @@
+Metric,Chi_Square,P_Value,Significant
+Accuracy,6,0.049787068,YES
+Precision,4.666666667,0.096971968,NO
+Recall,6,0.049787068,YES
+F1_Score,6,0.049787068,YES

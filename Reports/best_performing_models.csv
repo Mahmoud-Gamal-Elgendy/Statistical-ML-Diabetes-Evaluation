@@ -1,0 +1,13 @@
+Metric,Rank,Model_Group_ID,Model_Group_Name,Mean_Performance
+Accuracy,1,G1,RandomForest,0.829286072
+Accuracy,2,G3,XGBoost,0.826914289
+Accuracy,3,G2,SVM,0.654824075
+Precision,1,G1,RandomForest,0.784986375
+Precision,2,G3,XGBoost,0.777776732
+Precision,3,G2,SVM,0.708488477
+Recall,1,G1,RandomForest,0.829286072
+Recall,2,G3,XGBoost,0.826914289
+Recall,3,G2,SVM,0.654824075
+F1_Score,1,G3,XGBoost,0.784036313
+F1_Score,2,G1,RandomForest,0.782032262
+F1_Score,3,G2,SVM,0.668724691

@@ -1,0 +1,10 @@
+Metric,Group1,Group2,P_Value,Significant
+Accuracy,G1 (RandomForest),G2 (SVM),0.038034587,YES
+Accuracy,G1 (RandomForest),G3 (XGBoost),0.438488789,NO
+Accuracy,G2 (SVM),G3 (XGBoost),0.438488789,NO
+Recall,G1 (RandomForest),G2 (SVM),0.038034587,YES
+Recall,G1 (RandomForest),G3 (XGBoost),0.438488789,NO
+Recall,G2 (SVM),G3 (XGBoost),0.438488789,NO
+F1_Score,G1 (RandomForest),G2 (SVM),0.438488789,NO
+F1_Score,G1 (RandomForest),G3 (XGBoost),0.438488789,NO
+F1_Score,G2 (SVM),G3 (XGBoost),0.038034587,YES

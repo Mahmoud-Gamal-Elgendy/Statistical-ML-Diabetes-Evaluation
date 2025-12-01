@@ -1,6 +1,14 @@
+import sys
+import io
 import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
+
+# Set UTF-8 encoding for console output to avoid Unicode errors
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+if sys.stderr.encoding != 'utf-8':
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # Import custom modules
 from model_training_pipeline import run_training_pipeline
@@ -26,10 +34,10 @@ def main():
     print("\n Organizing datasets...")
     datasets = {
         'D1': ('Real', real_data),
-        'D2': ('GAN', D2_synthetic_gan),
+        'D2': ('CTGAN', D2_synthetic_gan),
         'D3': ('VAE', D3_synthetic_vae)
     }
-    print("✓ Datasets organized: D1 (Real), D2 (GAN), D3 (VAE)")
+    print("✓ Datasets organized: D1 (Real), D2 (CTGAN), D3 (VAE)")
     
     # Step 3: Run Training Pipeline
     print("\n Running automated training pipeline...")

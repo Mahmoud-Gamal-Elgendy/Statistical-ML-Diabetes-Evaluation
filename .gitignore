@@ -2,3 +2,6 @@
 .venv
 .vscode
 Terminal_res.txt
+classification_models/
+__pycache__/
+

@@ -3,6 +3,15 @@ Test script for statistical_analysis.py
 Creates sample data and runs all statistical tests
 """
 
+import sys
+import io
+
+# Set UTF-8 encoding for console output
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+if sys.stderr.encoding != 'utf-8':
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 import numpy as np
 import pandas as pd
 from statistical_analysis import (
@@ -145,13 +154,13 @@ def test_complete_analysis(results_df):
     
     for metric, results in all_results.items():
         print(f"\n{metric}:")
-        print(f"  Friedman test performed: ✓")
+        print(f"  Friedman test performed: [OK]")
         if 'effect_size' in results:
-            print(f"  Effect size calculated: ✓")
+            print(f"  Effect size calculated: [OK]")
         if 'posthoc' in results:
-            print(f"  Post-hoc test performed: ✓")
+            print(f"  Post-hoc test performed: [OK]")
         if 'hommel' in results:
-            print(f"  Hommel correction performed: ✓")
+            print(f"  Hommel correction performed: [OK]")
     
     return all_results
 
@@ -186,7 +195,7 @@ def main():
     # Create sample data
     print("\n[STEP 1] Creating sample experimental results...")
     results_df = create_sample_data()
-    print(f"✓ Created {len(results_df)} experimental runs")
+    print(f"[OK] Created {len(results_df)} experimental runs")
     
     # Display sample data
     display_sample_data(results_df)

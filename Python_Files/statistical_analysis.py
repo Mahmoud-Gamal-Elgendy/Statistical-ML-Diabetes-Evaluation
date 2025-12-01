@@ -101,6 +101,8 @@ def perform_friedman_test(results_df, metric='Accuracy'):
         'statistic': friedman_stat,
         'p_value': friedman_p,
         'is_significant': is_significant,
+        'dataset_ids': dataset_ids,
+        'dataset_names': dataset_names,
         'group_ids': group_ids,
         'group_names': group_names,
         'mean_matrix': mean_matrix,
@@ -309,10 +311,18 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
     all_results : dict
         Dictionary containing all statistical test results
     output_dir : str
-        Directory to save CSV files
+        Directory to save CSV files (relative to project root, not script location)
     """
     import os
-    os.makedirs(output_dir, exist_ok=True)
+    from pathlib import Path
+    
+    # Get the project root directory (parent of Python_Files)
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    
+    # Create absolute path to output directory
+    output_path = project_root / output_dir
+    output_path.mkdir(parents=True, exist_ok=True)
     
     metrics = ['Accuracy', 'Precision', 'Recall', 'F1_Score']
     
@@ -328,7 +338,7 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
         })
     
     friedman_df = pd.DataFrame(friedman_data)
-    friedman_df.to_csv(f'{output_dir}/friedman_test_results.csv', index=False)
+    friedman_df.to_csv(output_path / 'friedman_test_results.csv', index=False)
     
     # 2. Mean Performance by Dataset and Model Group
     mean_performance_data = []
@@ -352,7 +362,7 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
                 })
     
     mean_perf_df = pd.DataFrame(mean_performance_data)
-    mean_perf_df.to_csv(f'{output_dir}/mean_performance_by_group.csv', index=False)
+    mean_perf_df.to_csv(output_path / 'mean_performance_by_group.csv', index=False)
     
     # 3. Effect Size Results
     effect_size_data = []
@@ -361,13 +371,13 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
             effect_size = all_results[metric]['effect_size']
             effect_size_data.append({
                 'Metric': metric,
-                'Kendall_W': effect_size['kendall_w'],
+                'Kendall_W': effect_size['kendalls_w'],
                 'Effect_Size_Interpretation': effect_size['interpretation']
             })
     
     if effect_size_data:
         effect_size_df = pd.DataFrame(effect_size_data)
-        effect_size_df.to_csv(f'{output_dir}/effect_size_results.csv', index=False)
+        effect_size_df.to_csv(output_path / 'effect_size_results.csv', index=False)
     
     # 4. Nemenyi Post-hoc Test Results
     posthoc_data = []
@@ -385,7 +395,7 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
     
     if posthoc_data:
         posthoc_df = pd.DataFrame(posthoc_data)
-        posthoc_df.to_csv(f'{output_dir}/nemenyi_posthoc_results.csv', index=False)
+        posthoc_df.to_csv(output_path / 'nemenyi_posthoc_results.csv', index=False)
     
     # 5. Hommel Correction Results
     hommel_data = []
@@ -406,7 +416,7 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
     
     if hommel_data:
         hommel_df = pd.DataFrame(hommel_data)
-        hommel_df.to_csv(f'{output_dir}/hommel_correction_results.csv', index=False)
+        hommel_df.to_csv(output_path / 'hommel_correction_results.csv', index=False)
     
     # 6. Best Performing Model Groups Summary
     best_models_data = []
@@ -429,9 +439,9 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
             })
     
     best_models_df = pd.DataFrame(best_models_data)
-    best_models_df.to_csv(f'{output_dir}/best_performing_models.csv', index=False)
+    best_models_df.to_csv(output_path / 'best_performing_models.csv', index=False)
     
-    print(f"\n✓ Statistical analysis results saved to '{output_dir}/' directory:")
+    print(f"\n✓ Statistical analysis results saved to '{output_path}' directory:")
     print(f"  - friedman_test_results.csv")
     print(f"  - mean_performance_by_group.csv")
     if effect_size_data:

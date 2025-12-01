@@ -27,11 +27,16 @@ Statistical ML Diabetes Evaluation/
 │   │   └── synthetic_2_unscaled.csv     # Unscaled VAE synthetic data
 │   └── Real/
 │       └── diabetes_012_health_indicators_BRFSS2015.csv
-├── models/
+├── models/                              # Trained ML models (36 total)
+│   ├── D1G1P1_model.pkl to D1G3P4_model.pkl  # Real dataset models (12)
+│   ├── D2G1P1_model.pkl to D2G3P4_model.pkl  # CTGAN dataset models (12)
+│   ├── D3G1P1_model.pkl to D3G3P4_model.pkl  # VAE dataset models (12)
 │   ├── CTGAN/
-│   │   └── checkpoints/                 # CTGAN model checkpoints
+│   │   ├── ctgan_final.pkl              # Trained CTGAN generator model
+│   │   └── checkpoints/                 # CTGAN training checkpoints
 │   └── VAE/
-│       └── checkpoints/                 # VAE model checkpoints
+│       ├── vae_final.pkl                # Trained VAE generator model
+│       └── checkpoints/                 # VAE training checkpoints
 ├── Python_Files/
 │   ├── main.py                          # Main execution script
 │   ├── CTGAN_model.py                   # CTGAN synthetic data generator
@@ -40,9 +45,16 @@ Statistical ML Diabetes Evaluation/
 │   ├── statistical_analysis.py          # Friedman & post-hoc tests
 │   ├── visualization.py                 # Plotting and visualization
 │   ├── unscale_synthetic_data.py        # Data preprocessing utilities
-│   └── test_statistical_analysis.py     # test
-├── Reports/                             # Generated reports and results
+│   └── test_statistical_analysis.py     # Statistical analysis unit tests
+├── Reports/                             # Generated statistical analysis results
+│   ├── friedman_test_results.csv        # Friedman ANOVA test summary
+│   ├── mean_performance_by_group.csv    # Mean metrics per model/dataset
+│   ├── effect_size_results.csv          # Kendall's W effect sizes
+│   ├── nemenyi_posthoc_results.csv      # Pairwise comparison results
+│   ├── hommel_correction_results.csv    # Multiple comparison corrections
+│   └── best_performing_models.csv       # Model rankings per metric
 ├── visualizations/                      # Generated plots and charts
+├── experiment_results_complete.csv      # Complete experimental results (36 runs)
 ├── Project workflow/                    # Documentation and workflows
 └── README.md                            # This file
 ```

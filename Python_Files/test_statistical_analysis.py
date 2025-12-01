@@ -130,8 +130,12 @@ def test_complete_analysis(results_df):
     print("TESTING COMPLETE ANALYSIS PIPELINE")
     print("="*80)
     
-    # Run complete analysis
-    all_results = run_complete_statistical_analysis(results_df)
+    # Run complete analysis with CSV saving enabled
+    all_results = run_complete_statistical_analysis(
+        results_df, 
+        save_to_csv=True, 
+        output_dir='Reports/Test_Results'
+    )
     
     print("\n" + "="*80)
     print("TEST SUMMARY")

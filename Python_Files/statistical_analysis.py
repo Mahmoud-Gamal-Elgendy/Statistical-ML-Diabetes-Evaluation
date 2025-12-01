@@ -300,7 +300,150 @@ def perform_hommel_correction(mean_matrix, group_ids, group_names, metric='Accur
     }
 
 
-def run_complete_statistical_analysis(results_df):
+def save_statistical_results_to_csv(all_results, output_dir='Reports'):
+    """
+    Save statistical analysis results to CSV files
+    
+    Parameters:
+    -----------
+    all_results : dict
+        Dictionary containing all statistical test results
+    output_dir : str
+        Directory to save CSV files
+    """
+    import os
+    os.makedirs(output_dir, exist_ok=True)
+    
+    metrics = ['Accuracy', 'Precision', 'Recall', 'F1_Score']
+    
+    # 1. Friedman Test Summary
+    friedman_data = []
+    for metric in metrics:
+        friedman = all_results[metric]['friedman']
+        friedman_data.append({
+            'Metric': metric,
+            'Chi_Square': friedman['statistic'],
+            'P_Value': friedman['p_value'],
+            'Significant': 'YES' if friedman['is_significant'] else 'NO'
+        })
+    
+    friedman_df = pd.DataFrame(friedman_data)
+    friedman_df.to_csv(f'{output_dir}/friedman_test_results.csv', index=False)
+    
+    # 2. Mean Performance by Dataset and Model Group
+    mean_performance_data = []
+    for metric in metrics:
+        friedman = all_results[metric]['friedman']
+        mean_matrix = friedman['mean_matrix']
+        dataset_ids = friedman['dataset_ids']
+        dataset_names = friedman['dataset_names']
+        group_ids = friedman['group_ids']
+        group_names = friedman['group_names']
+        
+        for i, (ds_id, ds_name) in enumerate(zip(dataset_ids, dataset_names)):
+            for j, (g_id, g_name) in enumerate(zip(group_ids, group_names)):
+                mean_performance_data.append({
+                    'Metric': metric,
+                    'Dataset_ID': ds_id,
+                    'Dataset_Name': ds_name,
+                    'Model_Group_ID': g_id,
+                    'Model_Group_Name': g_name,
+                    'Mean_Performance': mean_matrix[i, j]
+                })
+    
+    mean_perf_df = pd.DataFrame(mean_performance_data)
+    mean_perf_df.to_csv(f'{output_dir}/mean_performance_by_group.csv', index=False)
+    
+    # 3. Effect Size Results
+    effect_size_data = []
+    for metric in metrics:
+        if 'effect_size' in all_results[metric]:
+            effect_size = all_results[metric]['effect_size']
+            effect_size_data.append({
+                'Metric': metric,
+                'Kendall_W': effect_size['kendall_w'],
+                'Effect_Size_Interpretation': effect_size['interpretation']
+            })
+    
+    if effect_size_data:
+        effect_size_df = pd.DataFrame(effect_size_data)
+        effect_size_df.to_csv(f'{output_dir}/effect_size_results.csv', index=False)
+    
+    # 4. Nemenyi Post-hoc Test Results
+    posthoc_data = []
+    for metric in metrics:
+        if 'posthoc' in all_results[metric]:
+            posthoc = all_results[metric]['posthoc']
+            for pair in posthoc['significant_pairs']:
+                posthoc_data.append({
+                    'Metric': metric,
+                    'Group1': pair[0],
+                    'Group2': pair[1],
+                    'P_Value': pair[2],
+                    'Significant': 'YES' if pair[3] else 'NO'
+                })
+    
+    if posthoc_data:
+        posthoc_df = pd.DataFrame(posthoc_data)
+        posthoc_df.to_csv(f'{output_dir}/nemenyi_posthoc_results.csv', index=False)
+    
+    # 5. Hommel Correction Results
+    hommel_data = []
+    for metric in metrics:
+        if 'hommel' in all_results[metric]:
+            hommel = all_results[metric]['hommel']
+            for comp in hommel['comparisons']:
+                hommel_data.append({
+                    'Metric': metric,
+                    'Group1_ID': comp['group1_id'],
+                    'Group1_Name': comp['group1_name'],
+                    'Group2_ID': comp['group2_id'],
+                    'Group2_Name': comp['group2_name'],
+                    'Raw_P_Value': comp['raw_pvalue'],
+                    'Corrected_P_Value': comp['corrected_pvalue'],
+                    'Significant': 'YES' if comp['is_significant'] else 'NO'
+                })
+    
+    if hommel_data:
+        hommel_df = pd.DataFrame(hommel_data)
+        hommel_df.to_csv(f'{output_dir}/hommel_correction_results.csv', index=False)
+    
+    # 6. Best Performing Model Groups Summary
+    best_models_data = []
+    for metric in metrics:
+        friedman = all_results[metric]['friedman']
+        mean_matrix = friedman['mean_matrix']
+        overall_means = mean_matrix.mean(axis=0)
+        group_ids = friedman['group_ids']
+        group_names = friedman['group_names']
+        
+        sorted_indices = np.argsort(overall_means)[::-1]
+        
+        for rank, idx in enumerate(sorted_indices, 1):
+            best_models_data.append({
+                'Metric': metric,
+                'Rank': rank,
+                'Model_Group_ID': group_ids[idx],
+                'Model_Group_Name': group_names[idx],
+                'Mean_Performance': overall_means[idx]
+            })
+    
+    best_models_df = pd.DataFrame(best_models_data)
+    best_models_df.to_csv(f'{output_dir}/best_performing_models.csv', index=False)
+    
+    print(f"\n✓ Statistical analysis results saved to '{output_dir}/' directory:")
+    print(f"  - friedman_test_results.csv")
+    print(f"  - mean_performance_by_group.csv")
+    if effect_size_data:
+        print(f"  - effect_size_results.csv")
+    if posthoc_data:
+        print(f"  - nemenyi_posthoc_results.csv")
+    if hommel_data:
+        print(f"  - hommel_correction_results.csv")
+    print(f"  - best_performing_models.csv")
+
+
+def run_complete_statistical_analysis(results_df, save_to_csv=True, output_dir='Reports'):
     """
     Run complete statistical analysis pipeline
     Compares MODEL GROUPS ONLY across dataset blocks using mean performance
@@ -309,6 +452,10 @@ def run_complete_statistical_analysis(results_df):
     -----------
     results_df : DataFrame
         Complete results dataframe with all experiments
+    save_to_csv : bool
+        Whether to save results to CSV files (default: True)
+    output_dir : str
+        Directory to save CSV files (default: 'Reports')
     
     Returns:
     --------
@@ -418,6 +565,10 @@ def run_complete_statistical_analysis(results_df):
     print("\n" + "="*80)
     print("ANALYSIS COMPLETE")
     print("="*80)
+    
+    # Save results to CSV if requested
+    if save_to_csv:
+        save_statistical_results_to_csv(all_results, output_dir=output_dir)
     
     return all_results
 

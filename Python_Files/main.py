@@ -19,7 +19,7 @@ def main():
     print("\n Loading real dataset...")
     real_data_path = 'Datasets/Real/diabetes_012_health_indicators_BRFSS2015.csv'
     real_data = pd.read_csv(real_data_path)
-    D2_synthetic_gan = pd.read_csv("Datasets/CTGAN/synthetic_1.csv")
+    D2_synthetic_gan = pd.read_csv("Datasets/CTGAN/synthetic_1_unscaled.csv")
     D3_synthetic_vae = pd.read_csv("Datasets/VAE/synthetic_2_unscaled.csv")
     
     # Step 2: Organize Datasets
@@ -56,7 +56,11 @@ def main():
     
     # Step 4: Statistical Analysis
     print("\n Performing statistical analysis...")
-    statistical_results = run_complete_statistical_analysis(results_df)
+    statistical_results = run_complete_statistical_analysis(
+        results_df, 
+        save_to_csv=True, 
+        output_dir='Reports'
+    )
     
     # Generate Visualizations
     print("\nGenerating visualizations...")
@@ -67,6 +71,7 @@ def main():
     print("="*80)
     print("\nGenerated Files:")
     print("  - experiment_results_complete.csv (All results)")
+    print("  - Reports/ (Statistical analysis CSV files)")
     print("  - models/ (36 trained models)")
     print("  - visualizations/ (Comparison plots)")
     

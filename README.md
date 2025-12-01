@@ -18,6 +18,9 @@ This project implements a complete experimental workflow to:
 
 ```
 Statistical ML Diabetes Evaluation/
+├── .git/                                # Git version control
+├── .gitignore                           # Git ignore file
+├── .venv/                               # Python virtual environment
 ├── Datasets/
 │   ├── CTGAN/
 │   │   ├── synthetic_1.csv              # Scaled CTGAN synthetic data
@@ -27,10 +30,11 @@ Statistical ML Diabetes Evaluation/
 │   │   └── synthetic_2_unscaled.csv     # Unscaled VAE synthetic data
 │   └── Real/
 │       └── diabetes_012_health_indicators_BRFSS2015.csv
-├── models/                              # Trained ML models (36 total)
-│   ├── D1G1P1_model.pkl to D1G3P4_model.pkl  # Real dataset models (12)
-│   ├── D2G1P1_model.pkl to D2G3P4_model.pkl  # CTGAN dataset models (12)
-│   ├── D3G1P1_model.pkl to D3G3P4_model.pkl  # VAE dataset models (12)
+├── models/                              # All trained models
+│   ├── Classification_models/           # ML classification models (36 total)
+│   │   ├── D1G1P1_model.pkl to D1G3P4_model.pkl  # Real dataset models (12)
+│   │   ├── D2G1P1_model.pkl to D2G3P4_model.pkl  # CTGAN dataset models (12)
+│   │   └── D3G1P1_model.pkl to D3G3P4_model.pkl  # VAE dataset models (12)
 │   ├── CTGAN/
 │   │   ├── ctgan_final.pkl              # Trained CTGAN generator model
 │   │   └── checkpoints/                 # CTGAN training checkpoints
@@ -45,7 +49,7 @@ Statistical ML Diabetes Evaluation/
 │   ├── statistical_analysis.py          # Friedman & post-hoc tests
 │   ├── visualization.py                 # Plotting and visualization
 │   ├── unscale_synthetic_data.py        # Data preprocessing utilities
-│   └── test_statistical_analysis.py     # Statistical analysis unit tests
+│   └── test_statistical_analysis.py     # Statistical analysis tests
 ├── Reports/                             # Generated statistical analysis results
 │   ├── friedman_test_results.csv        # Friedman ANOVA test summary
 │   ├── mean_performance_by_group.csv    # Mean metrics per model/dataset
@@ -54,8 +58,9 @@ Statistical ML Diabetes Evaluation/
 │   ├── hommel_correction_results.csv    # Multiple comparison corrections
 │   └── best_performing_models.csv       # Model rankings per metric
 ├── visualizations/                      # Generated plots and charts
-├── experiment_results_complete.csv      # Complete experimental results (36 runs)
+│   └── comprehensive_comparison.png     # Model performance visualizations
 ├── Project workflow/                    # Documentation and workflows
+├── experiment_results_complete.csv      # Complete experimental results (36 runs)
 └── README.md                            # This file
 ```
 

@@ -31,10 +31,18 @@ Statistical ML Diabetes Evaluation/
 │   └── Real/
 │       └── diabetes_012_health_indicators_BRFSS2015.csv
 ├── models/                              # All trained models
-│   ├── Classification_models/           # ML classification models (36 total)
-│   │   ├── D1G1P1_model.pkl to D1G3P4_model.pkl  # Real dataset models (12)
-│   │   ├── D2G1P1_model.pkl to D2G3P4_model.pkl  # CTGAN dataset models (12)
-│   │   └── D3G1P1_model.pkl to D3G3P4_model.pkl  # VAE dataset models (12)
+│   ├── RandomForest/                    # Random Forest models (12 total)
+│   │   ├── D1G1P1_model.pkl to D1G1P4_model.pkl  # Real dataset models (4)
+│   │   ├── D2G1P1_model.pkl to D2G1P4_model.pkl  # CTGAN dataset models (4)
+│   │   └── D3G1P1_model.pkl to D3G1P4_model.pkl  # VAE dataset models (4)
+│   ├── SVM/                             # SVM models (12 total)
+│   │   ├── D1G2P1_model.pkl to D1G2P4_model.pkl  # Real dataset models (4)
+│   │   ├── D2G2P1_model.pkl to D2G2P4_model.pkl  # CTGAN dataset models (4)
+│   │   └── D3G2P1_model.pkl to D3G2P4_model.pkl  # VAE dataset models (4)
+│   ├── XGBoost/                         # XGBoost models (12 total)
+│   │   ├── D1G3P1_model.pkl to D1G3P4_model.pkl  # Real dataset models (4)
+│   │   ├── D2G3P1_model.pkl to D2G3P4_model.pkl  # CTGAN dataset models (4)
+│   │   └── D3G3P1_model.pkl to D3G3P4_model.pkl  # VAE dataset models (4)
 │   ├── CTGAN/
 │   │   ├── ctgan_final.pkl              # Trained CTGAN generator model
 │   │   └── checkpoints/                 # CTGAN training checkpoints
@@ -50,16 +58,23 @@ Statistical ML Diabetes Evaluation/
 │   ├── visualization.py                 # Plotting and visualization
 │   ├── unscale_synthetic_data.py        # Data preprocessing utilities
 │   └── test_statistical_analysis.py     # Statistical analysis tests
-├── Reports/                             # Generated statistical analysis results
+├── Reports/                             # Analysis reports and documentation
+│   └── Experimental_Results_Analysis.ipynb  # Jupyter notebook with comprehensive analysis
+├── statistical_results/                 # Statistical analysis results
 │   ├── friedman_test_results.csv        # Friedman ANOVA test summary
-│   ├── mean_performance_by_group.csv    # Mean metrics per model/dataset
+│   ├── aggregated_model_results.csv     # Mean metrics per model across datasets
 │   ├── effect_size_results.csv          # Kendall's W effect sizes
-│   ├── nemenyi_posthoc_results.csv      # Pairwise comparison results
+│   ├── nemenyi_posthoc_results.csv      # Pairwise comparison results (p-values)
+│   ├── nemenyi_posthoc_mean_ranks.csv   # Mean ranks for Nemenyi test
 │   ├── hommel_correction_results.csv    # Multiple comparison corrections
-│   └── best_performing_models.csv       # Model rankings per metric
+│   ├── model_rankings_by_metric.csv     # Model rankings per metric
+│   ├── performance_differences.csv      # Pairwise performance differences
+│   └── dataset_performance_summary.csv  # Performance breakdown by dataset
 ├── visualizations/                      # Generated plots and charts
 │   └── comprehensive_comparison.png     # Model performance visualizations
 ├── Project workflow/                    # Documentation and workflows
+│   ├── Diagram.excalidraw               # Project workflow diagram
+│   └── Workflow Diagram.excalidraw      # Detailed workflow visualization
 ├── experiment_results_complete.csv      # Complete experimental results (36 runs)
 └── README.md                            # This file
 ```

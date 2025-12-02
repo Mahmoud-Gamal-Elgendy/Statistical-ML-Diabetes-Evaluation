@@ -1,0 +1,4 @@
+Model_Name,Average_Rank,Times_Ranked_Best,Best_Percentage
+RandomForest,1.25,3,75
+SVM,3,0,0
+XGBoost,1.75,1,25

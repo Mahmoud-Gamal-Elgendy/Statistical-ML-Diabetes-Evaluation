@@ -1,7 +1,8 @@
 .venv_py311
 .venv
 .vscode
-Terminal_res.txt
-classification_models/
+XGBoost/
+SVM/
+RandomForest/
 __pycache__/
-
+Simulation_of_Complete_Workflow.md

@@ -12,7 +12,7 @@ if sys.stderr.encoding != 'utf-8':
 
 # Import custom modules
 from model_training_pipeline import run_training_pipeline
-from statistical_analysis import run_complete_statistical_analysis
+from statistical_analysis import run_complete_statistical_analysis, aggregate_model_results
 from visualization import plot_comparison_summary, save_visualizations
 
 
@@ -62,12 +62,16 @@ def main():
     print(f"  Max Accuracy:  {results_df['Accuracy'].max():.4f}")
     print(f"  Min Accuracy:  {results_df['Accuracy'].min():.4f}")
     
-    # Step 4: Statistical Analysis
+    # Step 4: Aggregate Model Results
+    print("\n Aggregating model performance...")
+    aggregated_df = aggregate_model_results(results_df, output_file='aggregated_model_results.csv')
+    
+    # Step 5: Statistical Analysis
     print("\n Performing statistical analysis...")
     statistical_results = run_complete_statistical_analysis(
-        results_df, 
+        aggregated_df, 
         save_to_csv=True, 
-        output_dir='Reports'
+        output_dir='statistical_results'
     )
     
     # Generate Visualizations
@@ -78,13 +82,14 @@ def main():
     print("✓ WORKFLOW COMPLETED SUCCESSFULLY!")
     print("="*80)
     print("\nGenerated Files:")
-    print("  - experiment_results_complete.csv (All results)")
-    print("  - Reports/ (Statistical analysis CSV files)")
+    print("  - experiment_results_complete.csv (All 36 experimental results)")
+    print("  - aggregated_model_results.csv (Average metrics per model)")
+    print("  - statistical_results/ (Statistical analysis CSV files)")
     print("  - models/ (36 trained models)")
     print("  - visualizations/ (Comparison plots)")
     
-    return results_df, statistical_results
+    return results_df, aggregated_df, statistical_results
 
 
 if __name__ == "__main__":
-    results_df, statistical_results = main()
+    results_df, aggregated_df, statistical_results = main()

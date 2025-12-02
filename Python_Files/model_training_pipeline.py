@@ -180,6 +180,19 @@ def run_training_pipeline(datasets_dict, models_dir='models', custom_params=None
         if verbose:
             print(f"✓ Created '{models_dir}' directory")
     
+    # Create subdirectories for each model type
+    model_subdirs = {
+        'RandomForest': os.path.join(models_dir, 'RandomForest'),
+        'SVM': os.path.join(models_dir, 'SVM'),
+        'XGBoost': os.path.join(models_dir, 'XGBoost')
+    }
+    
+    for model_type, subdir in model_subdirs.items():
+        if not os.path.exists(subdir):
+            os.makedirs(subdir)
+            if verbose:
+                print(f"✓ Created '{subdir}' subdirectory")
+    
     # Get parameters
     if custom_params is None:
         params_dict = get_default_parameters()
@@ -239,8 +252,9 @@ def run_training_pipeline(datasets_dict, models_dir='models', custom_params=None
                         X_test_scaled, y_test, group_id
                     )
                     
-                    # Save model
-                    model_filename = f"{models_dir}/{experiment_id}_model.pkl"
+                    # Save model to specific subdirectory
+                    model_subdir = model_subdirs[model_name]
+                    model_filename = os.path.join(model_subdir, f"{experiment_id}_model.pkl")
                     with open(model_filename, 'wb') as f:
                         pickle.dump(model, f)
                     

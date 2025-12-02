@@ -1,0 +1,13 @@
+Metric,Rank,Model_Name,Value,Label
+Accuracy,1,RandomForest,0.829286,BEST
+Accuracy,2,XGBoost,0.826914,2nd
+Accuracy,3,SVM,0.654824,3rd
+Precision,1,RandomForest,0.784986,BEST
+Precision,2,XGBoost,0.777777,2nd
+Precision,3,SVM,0.708488,3rd
+Recall,1,RandomForest,0.829286,BEST
+Recall,2,XGBoost,0.826914,2nd
+Recall,3,SVM,0.654824,3rd
+F1_Score,1,XGBoost,0.784036,BEST
+F1_Score,2,RandomForest,0.782032,2nd
+F1_Score,3,SVM,0.668725,3rd

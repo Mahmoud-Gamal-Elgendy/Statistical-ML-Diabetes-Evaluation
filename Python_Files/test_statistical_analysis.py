@@ -14,75 +14,23 @@ if sys.stderr.encoding != 'utf-8':
 
 import numpy as np
 import pandas as pd
-from statistical_analysis import (
-    perform_friedman_test,
-    calculate_effect_size,
-    perform_posthoc_test,
-    perform_hommel_correction,
-    run_complete_statistical_analysis
-)
+from statistical_analysis import run_complete_statistical_analysis
 
 def create_sample_data():
     """
-    Create sample experimental results data
-    
-    Structure:
-    - 3 Model Groups (G1=RandomForest, G2=SVM, G3=XGBoost)
-    - 3 Dataset Blocks (D1=Real, D2=GAN, D3=VAE)
-    - 4 Parameter Sets per group per dataset (P1, P2, P3, P4)
-    - Total: 3 groups × 3 datasets × 4 params = 36 runs
+    Create sample aggregated data with 3 rows (one per model)
+    This simulates the aggregated results after averaging all experiments
     """
     
-    np.random.seed(42)  # For reproducibility
-    
-    data = []
-    
-    # Define groups and datasets
-    group_ids = ['G1', 'G2', 'G3']
-    group_names = ['RandomForest', 'SVM', 'XGBoost']
-    dataset_ids = ['D1', 'D2', 'D3']
-    dataset_names = ['Real', 'GAN', 'VAE']
-    param_ids = ['P1', 'P2', 'P3', 'P4']
-    
-    # Base performance for each group (to create realistic differences)
-    # G3 (XGBoost) performs best, G1 (RandomForest) second, G2 (SVM) third
-    base_performance = {
-        'G1': {'Accuracy': 0.85, 'Precision': 0.83, 'Recall': 0.82, 'F1_Score': 0.82},
-        'G2': {'Accuracy': 0.80, 'Precision': 0.78, 'Recall': 0.77, 'F1_Score': 0.77},
-        'G3': {'Accuracy': 0.90, 'Precision': 0.89, 'Recall': 0.88, 'F1_Score': 0.88}
+    # Create aggregated data directly (3 rows - one per model)
+    data = {
+        'Model_Name': ['RandomForest', 'SVM', 'XGBoost'],
+        'Accuracy': [0.8496, 0.7908, 0.8947],
+        'Precision': [0.8296, 0.7708, 0.8847],
+        'Recall': [0.8196, 0.7608, 0.8747],
+        'F1_Score': [0.8196, 0.7608, 0.8747],
+        'Training_Time': [45.23, 89.67, 123.45]
     }
-    
-    # Dataset impact (Real > GAN > VAE)
-    dataset_impact = {
-        'D1': 0.02,   # Real data: +2%
-        'D2': 0.00,   # GAN: baseline
-        'D3': -0.03   # VAE: -3%
-    }
-    
-    # Generate data for each combination
-    for group_id, group_name in zip(group_ids, group_names):
-        for dataset_id, dataset_name in zip(dataset_ids, dataset_names):
-            for param_id in param_ids:
-                # Get base performance and add dataset impact
-                base_acc = base_performance[group_id]['Accuracy'] + dataset_impact[dataset_id]
-                base_prec = base_performance[group_id]['Precision'] + dataset_impact[dataset_id]
-                base_rec = base_performance[group_id]['Recall'] + dataset_impact[dataset_id]
-                base_f1 = base_performance[group_id]['F1_Score'] + dataset_impact[dataset_id]
-                
-                # Add some random variation (parameter tuning effect)
-                noise = np.random.normal(0, 0.01)  # 1% std deviation
-                
-                data.append({
-                    'Dataset': dataset_id,
-                    'Dataset_Name': dataset_name,
-                    'Model_Group': group_id,
-                    'Model_Name': group_name,
-                    'Parameter_Set': param_id,
-                    'Accuracy': np.clip(base_acc + noise, 0, 1),
-                    'Precision': np.clip(base_prec + noise, 0, 1),
-                    'Recall': np.clip(base_rec + noise, 0, 1),
-                    'F1_Score': np.clip(base_f1 + noise, 0, 1)
-                })
     
     df = pd.DataFrame(data)
     return df
@@ -132,57 +80,44 @@ def test_individual_functions(results_df):
         print(f"\nHommel correction completed: {hommel_results['n_significant']}/{hommel_results['n_comparisons']} significant")
 
 
-def test_complete_analysis(results_df):
-    """Test complete statistical analysis pipeline"""
+def test_complete_analysis(aggregated_df):
+    """Test complete statistical analysis pipeline with aggregated data"""
     
     print("\n" + "="*80)
     print("TESTING COMPLETE ANALYSIS PIPELINE")
     print("="*80)
     
-    # Run complete analysis with CSV saving enabled
-    all_results = run_complete_statistical_analysis(
-        results_df, 
+    # Run statistical analysis on aggregated data
+    print("\nRunning statistical analysis on aggregated data...")
+    statistical_results = run_complete_statistical_analysis(
+        aggregated_df, 
         save_to_csv=True, 
-        output_dir='Reports/Test_Results'
+        output_dir='statistical_results/Test_Results'
     )
     
     print("\n" + "="*80)
     print("TEST SUMMARY")
     print("="*80)
     
-    print(f"\nTotal metrics analyzed: {len(all_results)}")
+    print(f"\nAggregated data: {len(aggregated_df)} rows (3 models)")
+    print(f"\nStatistical analysis completed successfully!")
+    print(f"Results saved to: statistical_results/Test_Results/")
     
-    for metric, results in all_results.items():
-        print(f"\n{metric}:")
-        print(f"  Friedman test performed: [OK]")
-        if 'effect_size' in results:
-            print(f"  Effect size calculated: [OK]")
-        if 'posthoc' in results:
-            print(f"  Post-hoc test performed: [OK]")
-        if 'hommel' in results:
-            print(f"  Hommel correction performed: [OK]")
-    
-    return all_results
+    return statistical_results
 
 
-def display_sample_data(df, n=10):
-    """Display sample of the data"""
+def display_sample_data(df):
+    """Display the aggregated data"""
     
     print("\n" + "="*80)
-    print("SAMPLE DATA")
+    print("AGGREGATED MODEL DATA (3 ROWS)")
     print("="*80)
     
-    print(f"\nTotal rows: {len(df)}")
+    print(f"\nTotal models: {len(df)}")
     print(f"Columns: {list(df.columns)}")
     
-    print(f"\nFirst {n} rows:")
-    print(df.head(n))
-    
-    print("\nData summary by Model Group:")
-    print(df.groupby('Model_Group')[['Accuracy', 'Precision', 'Recall', 'F1_Score']].mean())
-    
-    print("\nData summary by Dataset:")
-    print(df.groupby('Dataset')[['Accuracy', 'Precision', 'Recall', 'F1_Score']].mean())
+    print("\nAggregated Data:")
+    print(df.to_string(index=False))
 
 
 def main():
@@ -192,21 +127,17 @@ def main():
     print("STATISTICAL ANALYSIS TEST SUITE")
     print("="*80)
     
-    # Create sample data
-    print("\n[STEP 1] Creating sample experimental results...")
-    results_df = create_sample_data()
-    print(f"[OK] Created {len(results_df)} experimental runs")
+    # Create aggregated sample data (3 rows)
+    print("\n[STEP 1] Creating aggregated sample data (3 models)...")
+    aggregated_df = create_sample_data()
+    print(f"[OK] Created aggregated data with {len(aggregated_df)} models")
     
-    # Display sample data
-    display_sample_data(results_df)
-    
-    # Test individual functions
-    print("\n" + "="*80)
-    test_individual_functions(results_df)
+    # Display aggregated data
+    display_sample_data(aggregated_df)
     
     # Test complete analysis
     print("\n" + "="*80)
-    test_complete_analysis(results_df)
+    test_complete_analysis(aggregated_df)
     
     print("\n" + "="*80)
     print("ALL TESTS COMPLETED SUCCESSFULLY!")

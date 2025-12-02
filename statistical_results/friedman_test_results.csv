@@ -1,0 +1,2 @@
+Test,Chi_Square,P_Value,Degrees_of_Freedom,Significant,Conclusion
+Friedman ANOVA,6.5,0.038774208,2,Yes,Models differ significantly

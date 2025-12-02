@@ -5,6 +5,45 @@ from scikit_posthocs import posthoc_nemenyi_friedman
 from statsmodels.stats.multitest import multipletests
 
 
+def aggregate_model_results(results_df, output_file='aggregated_model_results.csv'):
+    """
+    Aggregate experimental results by computing average metrics for each model type.
+    
+    Parameters:
+    -----------
+    results_df : DataFrame
+        Complete results with all 36 experiments (3 datasets × 3 models × 4 parameters)
+    output_file : str
+        Output CSV filename
+    
+    Returns:
+    --------
+    DataFrame : Aggregated results with one row per model type
+    """
+    # Determine which metrics to aggregate (handle missing columns)
+    available_metrics = ['Accuracy', 'Precision', 'Recall', 'F1_Score']
+    if 'Training_Time' in results_df.columns:
+        available_metrics.append('Training_Time')
+    
+    # Create aggregation dictionary
+    agg_dict = {metric: 'mean' for metric in available_metrics}
+    
+    # Group by Model_Name and calculate mean of all metrics
+    aggregated = results_df.groupby('Model_Name').agg(agg_dict).reset_index()
+    
+    # Round to 6 decimal places for consistency
+    aggregated[available_metrics] = aggregated[available_metrics].round(6)
+    
+    # Save to CSV
+    aggregated.to_csv(output_file, index=False)
+    
+    print(f"\n✓ Aggregated model results saved to: {output_file}")
+    print(f"\nAggregated Results:")
+    print(aggregated.to_string(index=False))
+    
+    return aggregated
+
+
 def perform_friedman_test(results_df, metric='Accuracy'):
     """
     Perform Friedman ANOVA test to compare model groups across dataset blocks
@@ -453,28 +492,438 @@ def save_statistical_results_to_csv(all_results, output_dir='Reports'):
     print(f"  - best_performing_models.csv")
 
 
-def run_complete_statistical_analysis(results_df, save_to_csv=True, output_dir='Reports'):
+def run_complete_statistical_analysis(aggregated_df, save_to_csv=True, output_dir='statistical_results'):
     """
-    Run complete statistical analysis pipeline
-    Compares MODEL GROUPS ONLY across dataset blocks using mean performance
+    Run complete statistical analysis on aggregated model results
+    Compares 3 models: RandomForest vs SVM vs XGBoost
+    Performs: Friedman ANOVA, Effect Size (Kendall's W), Post-hoc (Nemenyi), Hommel Correction
     
     Parameters:
     -----------
-    results_df : DataFrame
-        Complete results dataframe with all experiments
+    aggregated_df : DataFrame
+        Aggregated results with one row per model (3 rows total)
+        Columns: Model_Name, Accuracy, Precision, Recall, F1_Score, Training_Time
     save_to_csv : bool
         Whether to save results to CSV files (default: True)
     output_dir : str
-        Directory to save CSV files (default: 'Reports')
+        Directory to save CSV files (default: 'statistical_results')
     
     Returns:
     --------
     dict : Dictionary containing all statistical test results
     """
+    from pathlib import Path
+    from scipy.stats import friedmanchisquare
+    from statsmodels.stats.multitest import multipletests
+    
     print("\n" + "="*80)
-    print("STATISTICAL ANALYSIS: MODEL GROUP COMPARISON")
-    print("Comparing RandomForest vs SVM vs XGBoost across Dataset Blocks")
+    print("STATISTICAL ANALYSIS: MODEL COMPARISON")
+    print("Comparing RandomForest vs SVM vs XGBoost")
     print("="*80)
+    
+    metrics = ['Accuracy', 'Precision', 'Recall', 'F1_Score']
+    
+    # Display aggregated results
+    print("\n" + "="*80)
+    print("AGGREGATED MODEL PERFORMANCE")
+    print("="*80)
+    print(aggregated_df[['Model_Name'] + metrics].to_string(index=False))
+    
+    # Note: For 3 models with single aggregated values, we treat each metric as a "repeated measure"
+    # This allows us to test if models differ consistently across metrics
+    print("\n" + "="*80)
+    print("STATISTICAL TESTS")
+    print("="*80)
+    print("\nTreating each metric as a repeated measure to test model consistency")
+    print("across performance indicators (Accuracy, Precision, Recall, F1_Score).")
+    
+    # Prepare data for Friedman test
+    # Create matrix: rows = metrics (repeated measures), columns = models (treatments)
+    model_names = aggregated_df['Model_Name'].tolist()
+    
+    # Build data matrix
+    data_matrix = []
+    for metric in metrics:
+        row = []
+        for model in model_names:
+            value = aggregated_df[aggregated_df['Model_Name'] == model][metric].values[0]
+            row.append(value)
+        data_matrix.append(row)
+    
+    data_matrix = np.array(data_matrix)
+    
+    print(f"\nData Matrix ({len(metrics)} metrics × {len(model_names)} models):")
+    print("-" * 80)
+    print(f"{'Metric':<15} {model_names[0]:>15} {model_names[1]:>15} {model_names[2]:>15}")
+    for i, metric in enumerate(metrics):
+        print(f"{metric:<15} {data_matrix[i, 0]:15.6f} {data_matrix[i, 1]:15.6f} {data_matrix[i, 2]:15.6f}")
+    
+    # STEP 1: Friedman ANOVA Test
+    print("\n" + "="*80)
+    print("STEP 1: FRIEDMAN ANOVA TEST")
+    print("="*80)
+    print("\nNull Hypothesis (H₀): All models perform equally across metrics")
+    print("Alternative Hypothesis (H₁): At least one model differs significantly")
+    print(f"Significance level: α = 0.05")
+    
+    # Perform Friedman test (each column is a model, each row is a metric)
+    model_1_scores = data_matrix[:, 0]
+    model_2_scores = data_matrix[:, 1]
+    model_3_scores = data_matrix[:, 2]
+    
+    friedman_stat, friedman_p = friedmanchisquare(model_1_scores, model_2_scores, model_3_scores)
+    
+    print(f"\nFriedman Test Results:")
+    print(f"  Chi-square statistic (χ²): {friedman_stat:.4f}")
+    print(f"  P-value: {friedman_p:.6f}")
+    print(f"  Degrees of freedom: {len(model_names) - 1}")
+    
+    is_significant = friedman_p < 0.05
+    
+    if is_significant:
+        print(f"\n  ✓ SIGNIFICANT (p < 0.05)")
+        print(f"  Conclusion: Models show significantly different performance across metrics")
+    else:
+        print(f"\n  ✗ NOT SIGNIFICANT (p ≥ 0.05)")
+        print(f"  Conclusion: No significant difference between models")
+    
+    friedman_results = {
+        'statistic': friedman_stat,
+        'p_value': friedman_p,
+        'is_significant': is_significant,
+        'df': len(model_names) - 1
+    }
+    
+    # STEP 2: Effect Size (Kendall's W)
+    print("\n" + "="*80)
+    print("STEP 2: EFFECT SIZE - Kendall's W")
+    print("="*80)
+    
+    k = len(metrics)  # number of raters (metrics)
+    n = len(model_names)  # number of treatments (models)
+    
+    # Kendall's W = χ² / (k * (n - 1))
+    kendalls_w = friedman_stat / (k * (n - 1))
+    
+    print(f"\nKendall's W (Coefficient of Concordance): {kendalls_w:.4f}")
+    print(f"\nInterpretation:")
+    
+    if kendalls_w < 0.3:
+        w_interpretation = "Small effect size (W < 0.3) - Weak agreement"
+    elif kendalls_w < 0.5:
+        w_interpretation = "Medium effect size (0.3 ≤ W < 0.5) - Moderate agreement"
+    else:
+        w_interpretation = "Large effect size (W ≥ 0.5) - Strong agreement"
+    
+    print(f"  {w_interpretation}")
+    print(f"\nThis indicates the degree of consistency in model rankings across metrics.")
+    
+    effect_size_results = {
+        'kendalls_w': kendalls_w,
+        'interpretation': w_interpretation
+    }
+    
+    # STEP 3: Post-hoc Test (Nemenyi) - only if significant
+    posthoc_results = None
+    if is_significant:
+        print("\n" + "="*80)
+        print("STEP 3: POST-HOC TEST - Nemenyi-Friedman")
+        print("="*80)
+        print("\nPairwise comparisons between models:")
+        
+        # Perform Nemenyi post-hoc test
+        # data_matrix: rows = metrics, columns = models
+        posthoc_matrix = posthoc_nemenyi_friedman(data_matrix)
+        
+        # Set labels
+        posthoc_matrix.columns = model_names
+        posthoc_matrix.index = model_names
+        
+        print("\nP-values for Pairwise Comparisons:")
+        print(posthoc_matrix.to_string())
+        
+        print("\n" + "-" * 80)
+        print("Significant Differences (p < 0.05):")
+        print("-" * 80)
+        
+        significant_pairs = []
+        for i in range(len(model_names)):
+            for j in range(i + 1, len(model_names)):
+                p_val = posthoc_matrix.iloc[i, j]
+                model_i = model_names[i]
+                model_j = model_names[j]
+                
+                if p_val < 0.05:
+                    print(f"  ✓ {model_i} vs {model_j}: p = {p_val:.6f} (SIGNIFICANT)")
+                    significant_pairs.append({
+                        'Model_1': model_i,
+                        'Model_2': model_j,
+                        'p_value': p_val,
+                        'significant': True
+                    })
+                else:
+                    print(f"  ✗ {model_i} vs {model_j}: p = {p_val:.6f} (not significant)")
+                    significant_pairs.append({
+                        'Model_1': model_i,
+                        'Model_2': model_j,
+                        'p_value': p_val,
+                        'significant': False
+                    })
+        
+        posthoc_results = {
+            'p_matrix': posthoc_matrix.to_dict(),
+            'significant_pairs': significant_pairs
+        }
+    else:
+        print("\n" + "="*80)
+        print("STEP 3: POST-HOC TEST - SKIPPED")
+        print("="*80)
+        print("\nPost-hoc test not performed (Friedman test was not significant)")
+    
+    # STEP 4: Hommel Correction - only if significant
+    hommel_results = None
+    if is_significant:
+        print("\n" + "="*80)
+        print("STEP 4: HOMMEL MULTIPLE COMPARISON CORRECTION")
+        print("="*80)
+        print("\nApplying Hommel correction to control family-wise error rate:")
+        
+        # Extract p-values from post-hoc test
+        pairwise_comparisons = []
+        p_values = []
+        
+        for i in range(len(model_names)):
+            for j in range(i + 1, len(model_names)):
+                p_val = posthoc_matrix.iloc[i, j]
+                pairwise_comparisons.append((model_names[i], model_names[j]))
+                p_values.append(p_val)
+        
+        # Apply Hommel correction
+        reject, pvals_corrected, _, _ = multipletests(p_values, alpha=0.05, method='hommel')
+        
+        print("\nHommel-Corrected Results:")
+        print("-" * 80)
+        
+        hommel_pairs = []
+        n_significant = 0
+        
+        for idx, (model_i, model_j) in enumerate(pairwise_comparisons):
+            original_p = p_values[idx]
+            corrected_p = pvals_corrected[idx]
+            is_sig = reject[idx]
+            
+            if is_sig:
+                n_significant += 1
+                print(f"  ✓ {model_i} vs {model_j}:")
+                print(f"      Original p = {original_p:.6f}, Corrected p = {corrected_p:.6f} (SIGNIFICANT)")
+            else:
+                print(f"  ✗ {model_i} vs {model_j}:")
+                print(f"      Original p = {original_p:.6f}, Corrected p = {corrected_p:.6f} (not significant)")
+            
+            hommel_pairs.append({
+                'Model_1': model_i,
+                'Model_2': model_j,
+                'original_p': original_p,
+                'corrected_p': corrected_p,
+                'significant': bool(is_sig)
+            })
+        
+        print(f"\nSummary: {n_significant}/{len(pairwise_comparisons)} comparisons remain significant after correction")
+        
+        hommel_results = {
+            'comparisons': hommel_pairs,
+            'n_significant': n_significant,
+            'n_comparisons': len(pairwise_comparisons)
+        }
+    else:
+        print("\n" + "="*80)
+        print("STEP 4: HOMMEL CORRECTION - SKIPPED")
+        print("="*80)
+        print("\nHommel correction not performed (Friedman test was not significant)")
+    
+    # Store all results
+    all_results = {
+        'model_performance': aggregated_df.to_dict('records'),
+        'friedman_test': friedman_results,
+        'effect_size': effect_size_results,
+        'posthoc_test': posthoc_results,
+        'hommel_correction': hommel_results,
+        'rankings': [],
+        'differences': []
+    }
+    
+    # Calculate rankings and differences
+    print("\n" + "="*80)
+    print("MODEL RANKINGS AND PERFORMANCE DIFFERENCES")
+    print("="*80)
+    
+    results_summary = []
+    difference_summary = []
+    
+    for metric in metrics:
+        print(f"\n{metric}:")
+        print("-" * 80)
+        
+        # Sort models by metric
+        sorted_df = aggregated_df.sort_values(by=metric, ascending=False).reset_index(drop=True)
+        
+        # Display rankings with values
+        for rank, row in sorted_df.iterrows():
+            model_name = row['Model_Name']
+            value = row[metric]
+            rank_num = rank + 1
+            
+            if rank_num == 1:
+                print(f"  BEST:  {model_name:15s}: {value:.6f}")
+                label = "BEST"
+            elif rank_num == 2:
+                print(f"  2nd:   {model_name:15s}: {value:.6f}")
+                label = "2nd"
+            else:
+                print(f"  3rd:   {model_name:15s}: {value:.6f}")
+                label = "3rd"
+            
+            results_summary.append({
+                'Metric': metric,
+                'Rank': rank_num,
+                'Model_Name': model_name,
+                'Value': value,
+                'Label': label
+            })
+        
+        # Calculate pairwise differences
+        print(f"\n  Performance Differences:")
+        best_value = sorted_df.iloc[0][metric]
+        best_model = sorted_df.iloc[0]['Model_Name']
+        
+        for rank, row in sorted_df.iterrows():
+            if rank > 0:  # Skip the best model
+                model_name = row['Model_Name']
+                value = row[metric]
+                diff = best_value - value
+                diff_pct = (diff / value) * 100
+                
+                print(f"    {best_model} vs {model_name}: +{diff:.6f} (+{diff_pct:.2f}%)")
+                
+                difference_summary.append({
+                    'Metric': metric,
+                    'Model_1': best_model,
+                    'Model_2': model_name,
+                    'Difference': diff,
+                    'Difference_Percent': diff_pct,
+                    'Model_1_Value': best_value,
+                    'Model_2_Value': value
+                })
+    
+    all_results['rankings'] = results_summary
+    all_results['differences'] = difference_summary
+    
+    # Summary statistics
+    print("\n" + "="*80)
+    print("OVERALL MODEL PERFORMANCE SUMMARY")
+    print("="*80)
+    
+    # Calculate average rank for each model across all metrics
+    ranking_df = pd.DataFrame(results_summary)
+    avg_ranks = ranking_df.groupby('Model_Name')['Rank'].mean().sort_values()
+    
+    print("\nAverage Rank Across All Metrics (lower is better):")
+    for model, avg_rank in avg_ranks.items():
+        print(f"  {model:15s}: {avg_rank:.2f}")
+    
+    # Count how many times each model was best
+    best_counts = ranking_df[ranking_df['Label'] == 'BEST'].groupby('Model_Name').size()
+    print("\nNumber of Times Ranked BEST:")
+    for model in aggregated_df['Model_Name']:
+        count = best_counts.get(model, 0)
+        print(f"  {model:15s}: {count}/{len(metrics)} metrics")
+    
+    print("\n" + "="*80)
+    print("ANALYSIS COMPLETE")
+    print("="*80)
+    
+    # Save results to CSV if requested
+    if save_to_csv:
+        # Get the project root directory
+        script_dir = Path(__file__).parent
+        project_root = script_dir.parent
+        
+        # Create absolute path to output directory
+        output_path = project_root / output_dir
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        # 1. Save aggregated performance summary
+        aggregated_df.to_csv(output_path / 'model_performance_summary.csv', index=False)
+        
+        # 2. Save ranking results
+        ranking_df = pd.DataFrame(results_summary)
+        ranking_df.to_csv(output_path / 'model_ranking_by_metric.csv', index=False)
+        
+        # 3. Save comparison matrix
+        comparison_df = aggregated_df[['Model_Name'] + metrics].set_index('Model_Name')
+        comparison_df.to_csv(output_path / 'model_comparison_matrix.csv')
+        
+        # 4. Save performance differences
+        diff_df = pd.DataFrame(difference_summary)
+        diff_df.to_csv(output_path / 'model_performance_differences.csv', index=False)
+        
+        # 5. Save overall summary
+        summary_data = []
+        for model in aggregated_df['Model_Name']:
+            avg_rank = avg_ranks.get(model, 0)
+            best_count = best_counts.get(model, 0)
+            summary_data.append({
+                'Model_Name': model,
+                'Average_Rank': avg_rank,
+                'Times_Ranked_Best': best_count,
+                'Best_Percentage': (best_count / len(metrics)) * 100
+            })
+        summary_df = pd.DataFrame(summary_data)
+        summary_df.to_csv(output_path / 'model_overall_summary.csv', index=False)
+        
+        # 6. Save Friedman test results
+        friedman_df = pd.DataFrame([{
+            'Test': 'Friedman ANOVA',
+            'Chi_Square': friedman_results['statistic'],
+            'P_Value': friedman_results['p_value'],
+            'Degrees_of_Freedom': friedman_results['df'],
+            'Significant': 'Yes' if friedman_results['is_significant'] else 'No',
+            'Conclusion': 'Models differ significantly' if friedman_results['is_significant'] else 'No significant difference'
+        }])
+        friedman_df.to_csv(output_path / 'friedman_test_results.csv', index=False)
+        
+        # 7. Save effect size results
+        effect_df = pd.DataFrame([{
+            'Measure': 'Kendalls_W',
+            'Value': effect_size_results['kendalls_w'],
+            'Interpretation': effect_size_results['interpretation']
+        }])
+        effect_df.to_csv(output_path / 'effect_size_results.csv', index=False)
+        
+        # 8. Save post-hoc test results (if performed)
+        if posthoc_results is not None:
+            posthoc_df = pd.DataFrame(posthoc_results['significant_pairs'])
+            posthoc_df.to_csv(output_path / 'posthoc_nemenyi_results.csv', index=False)
+        
+        # 9. Save Hommel correction results (if performed)
+        if hommel_results is not None:
+            hommel_df = pd.DataFrame(hommel_results['comparisons'])
+            hommel_df.to_csv(output_path / 'hommel_correction_results.csv', index=False)
+        
+        print(f"\n✓ Statistical analysis results saved to '{output_path}' directory:")
+        print(f"  - model_performance_summary.csv")
+        print(f"  - model_ranking_by_metric.csv")
+        print(f"  - model_comparison_matrix.csv")
+        print(f"  - model_performance_differences.csv")
+        print(f"  - model_overall_summary.csv")
+        print(f"  - friedman_test_results.csv")
+        print(f"  - effect_size_results.csv")
+        if posthoc_results is not None:
+            print(f"  - posthoc_nemenyi_results.csv")
+        if hommel_results is not None:
+            print(f"  - hommel_correction_results.csv")
+    
+    return all_results
     
     metrics = ['Accuracy', 'Precision', 'Recall', 'F1_Score']
     all_results = {}

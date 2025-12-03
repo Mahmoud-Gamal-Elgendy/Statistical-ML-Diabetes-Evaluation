@@ -268,5 +268,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-**Last Updated**: November 2025  
+**Last Updated**: December 2025  
 **Status**: Active Development

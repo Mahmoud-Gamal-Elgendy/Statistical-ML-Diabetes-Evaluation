@@ -32,9 +32,9 @@ def main():
     
     # Step 1: Load Datasets
     print("\n[STEP 1] Loading datasets...")
-    real_data_path = 'Datasets/Real/diabetes_012_health_indicators_BRFSS2015.csv'
-    ctgan_data_path = 'Datasets/CTGAN/synthetic_1_unscaled.csv'
-    vae_data_path = 'Datasets/VAE/synthetic_2_unscaled.csv'
+    real_data_path = '../Datasets/Real/diabetes_012_health_indicators_BRFSS2015.csv'
+    ctgan_data_path = '../Datasets/CTGAN/synthetic_1_unscaled.csv'
+    vae_data_path = '../Datasets/VAE/synthetic_2_unscaled.csv'
     
     real_data = pd.read_csv(real_data_path)
     ctgan_data = pd.read_csv(ctgan_data_path)
@@ -62,7 +62,7 @@ def main():
     
     results_matrix = run_training_pipeline(
         datasets_dict=datasets,
-        models_dir='models',
+        models_dir='../models',
         n_blocks=4,
         n_folds=10,
         test_size=0.2,
@@ -71,7 +71,7 @@ def main():
     )
     
     # Save results matrix
-    results_matrix.to_csv('experiment_results_matrix.csv')
+    results_matrix.to_csv('../experiment_results_matrix.csv')
     print(f"\n✓ Results matrix saved to: experiment_results_matrix.csv")
     
     # Step 4: Statistical Analysis

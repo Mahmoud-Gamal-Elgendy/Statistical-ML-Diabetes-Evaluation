@@ -331,11 +331,15 @@ def save_results_to_csv(all_results, output_dir='statistical_results'):
     all_results : dict
         Dictionary containing all analysis results
     output_dir : str
-        Directory to save CSV files
+        Directory to save CSV files (can be absolute or relative path)
     """
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
-    output_path = project_root / output_dir
+    # Handle both absolute and relative paths
+    output_path = Path(output_dir)
+    
+    # If relative path, make it absolute from current working directory
+    if not output_path.is_absolute():
+        output_path = Path.cwd() / output_dir
+    
     output_path.mkdir(parents=True, exist_ok=True)
     
     # 1. Save data matrix

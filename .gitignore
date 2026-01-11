@@ -5,5 +5,5 @@ XGBoost/
 SVM/
 RandomForest/
 __pycache__/
-Project_workflow
-Reports
+.Project_workflow
+.Reports

@@ -357,7 +357,7 @@ pip install sdv torch
    python main.py
    ```
 
-### Alternative Workflows
+
 
 #### Run Statistical Analysis Only
 
@@ -406,113 +406,6 @@ with open('../models/RandomForest/Real_Block1.pkl', 'rb') as f:
 X_test = pd.read_csv('your_test_data.csv')
 predictions = model.predict(X_test)
 ```
-
-## 🎨 Key Features
-
-### 1. Automated Training Pipeline
-- Block-based data splitting with stratified sampling
-- 10-fold cross-validation for robust evaluation
-- Automatic model persistence (all 36 models saved as .pkl files)
-- Progress monitoring with detailed logging
-- Consistent scaling using StandardScaler
-
-### 2. Rigorous Statistical Validation
-- **Friedman ANOVA**: Non-parametric test for overall model differences
-- **Kendall's W**: Effect size measuring consistency across blocks
-- **Nemenyi Post-Hoc**: Pairwise model comparisons
-- **Hommel Correction**: Multiple testing correction
-- **Cliff's Delta**: Pairwise effect sizes
-- Comprehensive CSV outputs for all statistical tests (7 files)
-
-### 3. Synthetic Data Generation
-- **CTGAN**: Conditional Tabular GAN with Adam optimizer
-- **VAE**: Variational Autoencoder with Adam optimizer
-- Preserves statistical properties of original data
-- Generates balanced synthetic samples
-
-### 4. Rich Visualizations
-- Performance heatmaps (12×3 accuracy matrix)
-- Model comparison bar plots with error bars
-- Box plots showing distribution of accuracies
-- Dataset-specific comparison charts
-- 300 DPI publication-quality PNG files
-
-## 🧪 Testing
-
-The project includes comprehensive unit tests for statistical analysis functions:
-
-```bash
-cd Python_Files
-python test_statistical_analysis.py
-```
-
-**Test Coverage**:
-- 27 total tests covering all statistical functions
-- Tests for Friedman test with various data patterns
-- Kendall's W calculation validation
-- Nemenyi post-hoc test verification
-- Hommel correction accuracy
-- Cliff's Delta effect size computation
-- CSV output generation
-- Complete workflow integration tests
-
-## 📊 Results Summary
-
-**Typical Results** (from completed training run):
-
-| Dataset | RandomForest | SVM | XGBoost |
-|---------|-------------|-----|---------|
-| **Real** | 0.833 ± 0.001 | 0.617 ± 0.063 | 0.835 ± 0.001 |
-| **CTGAN** | 0.840 ± 0.001 | 0.727 ± 0.036 | 0.841 ± 0.001 |
-| **VAE** | 0.809 ± 0.002 | 0.592 ± 0.029 | 0.813 ± 0.002 |
-
-**Key Findings**:
-- ✓ RandomForest and XGBoost significantly outperform SVM
-- ✓ CTGAN synthetic data performs comparably to real data
-- ✓ VAE synthetic data shows slightly lower performance
-- ✓ Statistical tests confirm significant differences (p < 0.05)
-
-## 📝 Research Applications
-
-This framework is suitable for:
-- **Synthetic data quality evaluation**: Compare CTGAN vs VAE performance against real data
-- **Model robustness testing**: Evaluate model stability across different data blocks
-- **Cross-validation methodology**: Rigorous 10-fold CV with stratified sampling
-- **Statistical validation**: Non-parametric testing with effect size reporting
-- **Healthcare ML research**: Diabetes classification using BRFSS health indicators
-- **Reproducible experiments**: All models saved for future predictions and analysis
-
-## ✅ Confirmation: All Results Saved
-
-This workflow has been verified to save all outputs correctly:
-
-✓ **Classification Models**: 36 .pkl files in `models/RandomForest/`, `models/SVM/`, `models/XGBoost/`  
-✓ **Experiment Results**: `statistical_results/experiment_results_matrix.csv` (12×3 accuracy matrix)  
-✓ **Statistical Analysis**: 8 CSV files in `statistical_results/`  
-✓ **Visualizations**: 4 PNG files (300 DPI) in `visualizations/`  
-✓ **Generative Models**: 2 final models + 20 checkpoints in `models/CTGAN/` and `models/VAE/`
-
-All files are created automatically when running `main.py`.
-
-## 📞 Project Information
-
-**Project Type**: Machine Learning Research - Diabetes Classification  
-**Methodology**: 10-Fold Stratified Cross-Validation  
-**Statistical Testing**: Non-parametric (Friedman ANOVA + Post-hoc)  
-**Dataset**: BRFSS 2015 Health Indicators  
-**Synthetic Data**: CTGAN and VAE Generated  
-**Documentation**: Complete with hyperparameters and configurations
-
-#### Generate Visualizations Only
-
-```python
-from visualization import save_visualizations
-import pandas as pd
-
-results_df = pd.read_csv('experiment_results_complete.csv')
-save_visualizations(results_df, output_dir='visualizations')
-```
-
 
 ## 🔬 Key Features
 
@@ -582,5 +475,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-**Last Updated**: December 2025  
+**Last Updated**: Jan 2026
 **Status**: Active Development

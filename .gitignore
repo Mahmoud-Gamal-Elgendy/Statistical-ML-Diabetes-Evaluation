@@ -6,4 +6,10 @@ SVM/
 RandomForest/
 __pycache__/
 Project_workflow/
+Project_workflow/**
 Reports/
+Reports/**
+
+# OS / tooling
+Thumbs.db
+Desktop.ini

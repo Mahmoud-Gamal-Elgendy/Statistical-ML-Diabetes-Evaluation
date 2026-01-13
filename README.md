@@ -103,7 +103,11 @@ Statistical ML Diabetes Evaluation/
 │   ├── statistical_analysis.py          # Friedman, Nemenyi, effect size analysis
 │   ├── visualization.py                 # Plotting and visualization functions
 │   ├── unscale_synthetic_data.py        # Data preprocessing utilities
-│   └── test_statistical_analysis.py     # Unit tests (27 tests) for statistical functions
+│   ├── test_statistical_analysis.py     # Unit tests (27 tests) for statistical functions
+│   ├── finetune_randomforest.py         # Random Forest hyperparameter tuning (independent)
+│   ├── finetune_xgboost.py              # XGBoost hyperparameter tuning (independent)
+│   ├── finetune_svm.py                  # SVM hyperparameter tuning (independent)
+│   
 │
 ├── statistical_results/                 # Statistical analysis outputs (8 CSV files)
 │   ├── experiment_results_matrix.csv    # Main 12×3 accuracy matrix
@@ -127,19 +131,20 @@ Statistical ML Diabetes Evaluation/
 │
 ├── Reports/                             # Analysis reports and documentation
 │
+├── best_hyperparameters.md              # Fine-tuned hyperparameters from optimization experiments
 ├── MODEL_CONFIGURATIONS.md              # Detailed hyperparameter documentation
 ├── WORKFLOW_SUMMARY.md                  # Task completion checklist
 └── README.md                            # This file
 ```
 
 **Summary**:
-- **Total Files**: ~60+ files
+- **Total Files**: ~65+ files
 - **Classification Models**: 36 trained models (.pkl)
 - **Generative Models**: 2 final models + 20 checkpoints
 - **Statistical Results**: 8 CSV files
 - **Visualizations**: 4 PNG files (300 DPI)
-- **Source Code**: 8 Python modules
-- **Documentation**: 3 markdown files
+- **Source Code**: 11 Python modules (8 main + 3 fine-tuning)
+- **Documentation**: 5 markdown files
 
 ## 🎯 Research Methodology
 
@@ -159,17 +164,23 @@ Each dataset is split into **4 equal blocks** → **12 total data blocks**
 
 #### Model Hyperparameters & Configuration
 
-All models use a **single optimized parameter set** (no grid search) to ensure fair comparison.
+All models use **fine-tuned hyperparameters** optimized through RandomizedSearchCV and GridSearchCV.  
+See `best_hyperparameters.md` for complete fine-tuning methodology and results.
 
 ##### 1. Random Forest Classifier
 **Algorithm**: Ensemble of decision trees with bootstrap aggregation  
-**Optimizer**: N/A (deterministic algorithm, no gradient descent)
+**Optimizer**: N/A (deterministic algorithm, no gradient descent)  
+**Fine-Tuning**: RandomizedSearchCV (20 iterations, 3-fold CV)  
+**CV Accuracy**: 0.8342 | **Test Accuracy**: 0.8356
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
 | `n_estimators` | 100 | Number of trees in the forest |
-| `max_depth` | 20 | Maximum depth of each tree |
+| `max_depth` | 30 | Maximum depth of each tree (fine-tuned from 20) |
 | `min_samples_split` | 10 | Minimum samples required to split a node |
+| `min_samples_leaf` | 2 | Minimum samples required at leaf node (fine-tuned) |
+| `max_features` | 'log2' | Number of features for best split (fine-tuned) |
+| `class_weight` | None | No class weighting (fine-tuned) |
 | `random_state` | 42 | Random seed for reproducibility |
 | `n_jobs` | -1 | Use all CPU cores for parallel training |
 
@@ -178,29 +189,37 @@ All models use a **single optimized parameter set** (no grid search) to ensure f
 
 ##### 2. Support Vector Machine (SVM)
 **Algorithm**: Support Vector Classification with kernel trick  
-**Optimizer**: Sequential Minimal Optimization (SMO) - built into sklearn's SVC
+**Optimizer**: Sequential Minimal Optimization (SMO) - built into sklearn's SVC  
+**Fine-Tuning**: Stratified Sampling (5%) + GridSearchCV (Fast Mode, 2-fold CV)  
+**CV Accuracy**: 0.8297 (on sample) | **Test Accuracy**: 0.8000
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| `C` | 1.0 | Regularization parameter (penalty for misclassification) |
+| `C` | 1 | Regularization parameter (fine-tuned) |
 | `kernel` | 'rbf' | Radial Basis Function (Gaussian) kernel |
 | `gamma` | 'scale' | Kernel coefficient = 1 / (n_features × variance) |
-| `max_iter` | 1000 | Maximum iterations for solver convergence |
+| `class_weight` | None | No class weighting (fine-tuned) |
+| `max_iter` | 2000 | Maximum iterations for solver convergence (increased) |
 | `random_state` | 42 | Random seed for reproducibility |
 
 **Training Method**: Quadratic programming with kernel transformation  
-**Prediction**: Sign of decision function in transformed feature space
+**Prediction**: Sign of decision function in transformed feature space  
+**Note**: Fine-tuned on 5% stratified sample for computational efficiency (~10x speedup)
 
 ##### 3. XGBoost Classifier
 **Algorithm**: Gradient Boosted Decision Trees (GBDT)  
-**Optimizer**: Second-order gradient descent (Newton-Raphson)
+**Optimizer**: Second-order gradient descent (Newton-Raphson)  
+**Fine-Tuning**: RandomizedSearchCV (20 iterations, 3-fold CV)  
+**CV Accuracy**: 0.8350 | **Test Accuracy**: 0.8379
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
 | `n_estimators` | 100 | Number of boosting rounds (trees) |
 | `learning_rate` | 0.1 | Step size for gradient descent (η) |
-| `max_depth` | 6 | Maximum depth of each tree |
-| `subsample` | 0.8 | Fraction of samples for each tree (80%) |
+| `max_depth` | 5 | Maximum depth of each tree (fine-tuned from 6) |
+| `min_child_weight` | 1 | Minimum sum of instance weight in child (fine-tuned) |
+| `subsample` | 1.0 | Fraction of samples for each tree (fine-tuned from 0.8) |
+| `colsample_bytree` | 1.0 | Fraction of features for each tree (fine-tuned) |
 | `objective` | 'multi:softmax' | Multi-class classification with softmax |
 | `num_class` | 3 | Number of diabetes classes (0, 1, 2) |
 | `random_state` | 42 | Random seed for reproducibility |
@@ -209,6 +228,36 @@ All models use a **single optimized parameter set** (no grid search) to ensure f
 
 **Training Method**: Additive boosting with regularized objective  
 **Prediction**: Argmax of softmax probabilities across classes
+
+---
+
+### Hyperparameter Optimization Process
+
+All hyperparameters were optimized using dedicated fine-tuning scripts (see `Python_Files/finetune_*.py`):
+
+**Fine-Tuning Techniques**:
+1. **Random Forest**: RandomizedSearchCV
+   - 20 iterations sampling from parameter distributions
+   - 3-fold stratified cross-validation
+   - Parameters explored: n_estimators, max_depth, min_samples_split, min_samples_leaf, max_features, class_weight, criterion, max_leaf_nodes
+   - Runtime: ~3 minutes
+
+2. **XGBoost**: RandomizedSearchCV
+   - 20 iterations sampling from continuous/discrete distributions
+   - 3-fold stratified cross-validation
+   - Parameters explored: n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree
+   - Runtime: ~3 minutes
+
+3. **SVM**: Stratified Sampling + GridSearchCV (Fast Mode)
+   - 5% stratified sample to handle O(n²) complexity
+   - 2-fold cross-validation for speed
+   - Small grid: 4 combinations (C × class_weight)
+   - Runtime: ~1 minute (vs 15-30 minutes on full dataset)
+   - Final model evaluated on full test set
+
+**Results**: See `best_hyperparameters.md` for complete optimization results and comparison.
+
+---
 
 ##### Synthetic Data Generation Models
 

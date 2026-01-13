@@ -22,6 +22,7 @@ warnings.filterwarnings('ignore')
 def get_single_parameter_set():
     """
     Get single optimized parameter set for each model
+    Fine-tuned using RandomizedSearchCV and GridSearchCV
     
     Returns:
     --------
@@ -30,23 +31,29 @@ def get_single_parameter_set():
     params = {
         'RandomForest': {
             'n_estimators': 100,
-            'max_depth': 20,
+            'max_depth': 30,
             'min_samples_split': 10,
+            'min_samples_leaf': 2,
+            'max_features': 'log2',
+            'class_weight': None,
             'random_state': 42,
             'n_jobs': -1
         },
         'SVM': {
-            'C': 1.0,
+            'C': 1,
             'kernel': 'rbf',
             'gamma': 'scale',
-            'max_iter': 1000,
+            'class_weight': None,
+            'max_iter': 2000,
             'random_state': 42
         },
         'XGBoost': {
             'n_estimators': 100,
             'learning_rate': 0.1,
-            'max_depth': 6,
-            'subsample': 0.8,
+            'max_depth': 5,
+            'min_child_weight': 1,
+            'subsample': 1.0,
+            'colsample_bytree': 1.0,
             'objective': 'multi:softmax',
             'num_class': 3,
             'random_state': 42,

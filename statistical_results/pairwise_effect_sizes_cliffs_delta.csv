@@ -1,4 +1,4 @@
 Model_1,Model_2,Cliffs_Delta,Interpretation,Favors
-RandomForest,SVM,1.0,Large,RandomForest
-RandomForest,XGBoost,-0.2638888888888889,Small,XGBoost
-SVM,XGBoost,-1.0,Large,XGBoost
+RandomForest,SVM,1,Large,RandomForest
+RandomForest,XGBoost,-0.138888889,Negligible,XGBoost
+SVM,XGBoost,-1,Large,XGBoost

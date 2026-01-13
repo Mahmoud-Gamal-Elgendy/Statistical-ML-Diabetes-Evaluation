@@ -9,6 +9,7 @@ Project_workflow/
 Project_workflow/**
 Reports/
 Reports/**
+.best_hyperparameters.md
 
 # OS / tooling
 Thumbs.db

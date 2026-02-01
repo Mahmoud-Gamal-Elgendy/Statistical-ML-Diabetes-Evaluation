@@ -36,7 +36,7 @@ def plot_heatmap(results_matrix, figsize=(10, 8), cmap='YlGnBu', annot=True):
         annot=annot,
         fmt='.4f',
         cmap=cmap,
-        cbar_kws={'label': 'Accuracy'},
+        cbar_kws={'label': 'Accuracy (max=1)'},
         linewidths=0.5,
         linecolor='gray',
         ax=ax
@@ -78,8 +78,9 @@ def plot_model_comparison(results_matrix, figsize=(12, 6)):
                    yerr=model_stds.values, capsize=5)
     
     ax1.set_title('Average Accuracy by Model', fontsize=14, fontweight='bold')
-    ax1.set_ylabel('Mean Accuracy', fontsize=11)
-    ax1.set_ylim([0.7, 0.85])
+    ax1.set_ylabel('Mean Accuracy (max=1)', fontsize=11)
+    ax1.set_xlabel('Model', fontsize=11)
+    ax1.set_ylim([0.5, 1.0])
     ax1.grid(axis='y', alpha=0.3)
     
     # Add value labels
@@ -97,7 +98,7 @@ def plot_model_comparison(results_matrix, figsize=(12, 6)):
         patch.set_alpha(0.7)
     
     ax2.set_title('Accuracy Distribution by Model', fontsize=14, fontweight='bold')
-    ax2.set_ylabel('Accuracy', fontsize=11)
+    ax2.set_ylabel('Accuracy (max=1)', fontsize=11)
     ax2.set_xlabel('Model', fontsize=11)
     ax2.grid(axis='y', alpha=0.3)
     
@@ -135,10 +136,10 @@ def plot_block_comparison(results_matrix, figsize=(14, 8)):
     
     ax.set_title('Model Performance Across Data Blocks', fontsize=14, fontweight='bold')
     ax.set_xlabel('Data Block', fontsize=11, fontweight='bold')
-    ax.set_ylabel('Accuracy (10-Fold CV)', fontsize=11, fontweight='bold')
+    ax.set_ylabel('Accuracy (max=1)', fontsize=11, fontweight='bold')
     ax.set_xticks(x)
     ax.set_xticklabels(results_matrix.index, rotation=45, ha='right')
-    ax.legend(title='Model', fontsize=10)
+    ax.legend(title='Model', fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
     ax.grid(axis='y', alpha=0.3)
     
     plt.tight_layout()
@@ -188,13 +189,13 @@ def plot_dataset_comparison(results_matrix, figsize=(12, 6)):
                     color=dataset_colors[dataset_name])
         ax.set_xlabel('Block', fontsize=10)
         if ax_idx == 0:
-            ax.set_ylabel('Accuracy', fontsize=10, fontweight='bold')
+            ax.set_ylabel('Accuracy (max=1)', fontsize=10, fontweight='bold')
         ax.set_xticks(x)
         ax.set_xticklabels([b.split('_')[-1] for b in blocks])
         ax.grid(axis='y', alpha=0.3)
         
         if ax_idx == 2:
-            ax.legend(title='Model', fontsize=9, loc='lower right')
+            ax.legend(title='Model', fontsize=9, bbox_to_anchor=(1.05, 1), loc='upper left')
     
     plt.suptitle('Performance Comparison by Dataset Type', 
                  fontsize=14, fontweight='bold', y=1.02)
@@ -237,7 +238,8 @@ def plot_who_won_chart(results_matrix, summary_stats=None, figsize=(10, 7)):
     
     x_pos = np.arange(len(models))
     bars = ax.bar(x_pos, means, yerr=stds, capsize=10, color=colors, 
-                  alpha=0.85, edgecolor='black', linewidth=1.5, error_kw={'linewidth': 2})
+                  alpha=0.85, edgecolor='black', linewidth=1.5, error_kw={'linewidth': 2},
+                  width=0.5)
     
     # Add value labels on bars
     for i, (mean, std) in enumerate(zip(means, stds)):
@@ -246,13 +248,13 @@ def plot_who_won_chart(results_matrix, summary_stats=None, figsize=(10, 7)):
         ax.text(i, mean/2, f'±{std:.4f}', 
                 ha='center', va='center', fontweight='bold', fontsize=10, color='white')
     
-    ax.set_ylabel('Mean Accuracy', fontsize=14, fontweight='bold')
+    ax.set_ylabel('Mean Accuracy (max=1)', fontsize=14, fontweight='bold')
     ax.set_xlabel('Model', fontsize=14, fontweight='bold')
     ax.set_title('Model Performance Comparison: "Who Won?"', 
                  fontsize=16, fontweight='bold', pad=20)
     ax.set_xticks(x_pos)
     ax.set_xticklabels(models, fontsize=12, fontweight='bold')
-    ax.set_ylim([0.5, max(means + stds) + 0.05])
+    ax.set_ylim([0.5, 1.0])
     ax.grid(axis='y', alpha=0.3, linestyle='--')
     ax.axhline(y=0.8, color='gray', linestyle='--', linewidth=1, alpha=0.5, label='0.80 threshold')
     
@@ -260,7 +262,7 @@ def plot_who_won_chart(results_matrix, summary_stats=None, figsize=(10, 7)):
     from matplotlib.patches import Patch
     legend_elements = [Patch(facecolor='#27ae60', label='Top Performers (RF & XGBoost)'),
                       Patch(facecolor='#e74c3c', label='Poor Performer (SVM)')]
-    ax.legend(handles=legend_elements, loc='upper right', fontsize=10)
+    ax.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
     
     plt.tight_layout()
     return fig
@@ -312,26 +314,15 @@ def plot_real_vs_synthetic(results_matrix, figsize=(14, 7)):
             ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
                    f'{val:.3f}', ha='center', va='bottom', fontsize=9, fontweight='bold')
     
-    ax.set_ylabel('Mean Accuracy', fontsize=14, fontweight='bold')
+    ax.set_ylabel('Mean Accuracy (max=1)', fontsize=14, fontweight='bold')
     ax.set_xlabel('Dataset Type', fontsize=14, fontweight='bold')
     ax.set_title('Performance Comparison: Real vs. Synthetic Data', 
                  fontsize=16, fontweight='bold', pad=20)
     ax.set_xticks(x)
     ax.set_xticklabels(grouped_data.index, fontsize=13, fontweight='bold')
-    ax.legend(title='Model', fontsize=11, title_fontsize=12, loc='upper right')
-    ax.set_ylim([0.5, max(grouped_data.max()) + 0.05])
+    ax.legend(title='Model', fontsize=11, title_fontsize=12, bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax.set_ylim([0.5, 1.0])
     ax.grid(axis='y', alpha=0.3, linestyle='--')
-    
-    # Add annotations
-    ax.annotate('CTGAN:\nEasiest to learn', xy=(1, grouped_data.loc['CTGAN'].max()), 
-                xytext=(1, grouped_data.loc['CTGAN'].max() + 0.08),
-                ha='center', fontsize=10, fontweight='bold', color='green',
-                arrowprops=dict(arrowstyle='->', color='green', lw=2))
-    
-    ax.annotate('VAE:\nHardest to learn', xy=(2, grouped_data.loc['VAE'].min()), 
-                xytext=(2, grouped_data.loc['VAE'].min() - 0.08),
-                ha='center', fontsize=10, fontweight='bold', color='red',
-                arrowprops=dict(arrowstyle='->', color='red', lw=2))
     
     plt.tight_layout()
     return fig
@@ -402,7 +393,7 @@ def plot_critical_difference_diagram(results_matrix, posthoc_results, figsize=(1
     
     ax.set_xlim([0.5, max(sorted_ranks) + 0.5])
     ax.set_ylim([-1, len(sorted_models)/2 + 2])
-    ax.set_xlabel('Average Rank (Lower is Better)', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Average Rank (lower is better)', fontsize=14, fontweight='bold')
     ax.set_title('Critical Difference Diagram - Statistical Significance of Model Performance', 
                  fontsize=16, fontweight='bold', pad=20)
     ax.set_yticks([])
